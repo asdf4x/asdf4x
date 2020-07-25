@@ -1241,8 +1241,8 @@ while True:
 			command_list += ','.join(command[34]) + ' ※ 관리자만 실행 가능\n\n'     #서버나가기
 			command_list += ','.join(command[22]) + '\n'     #보스탐
 			command_list += ','.join(command[23]) + '\n'     #!보스탐
-			command_list += '.컷[보스명] 또는 .컷[보스명] 0000, 00:00\n'  
-			command_list += '.컷 [보스명] 또는 .컷 [보스명] 0000, 00:00\n'   
+			command_list += '[보스명]컷 또는 [보스명]컷 0000, 00:00\n'  
+			command_list += '[보스명] 컷 또는 [보스명] 컷 0000, 00:00\n'   
 			command_list += '[보스명]멍 또는 [보스명]멍 0000, 00:00\n'     
 			command_list += '[보스명]예상 또는 [보스명]예상 0000, 00:00\n' 
 			command_list += '[보스명]삭제\n'     
@@ -2662,16 +2662,37 @@ while True:
 			if not args:
 				sorted_item_list = sorted(item_Data.items(), key=lambda x: x[0])
 
+				embed_list : list = []
+				embed_index : int = 0
+				embed_cnt : int = 0
 				embed = discord.Embed(title = '', description = f'`{client.user.name}\'s 창고`', color = 0x00ff00)
+				
+				embed_list.append(embed)
 
 				if len(sorted_item_list) > 0 :
 					for item_id, count in sorted_item_list:
-						embed.add_field(name = item_id, value = count)
+						embed_cnt += 1
+						if embed_cnt > 24 :
+							embed_cnt = 0
+							embed_index += 1
+							tmp_embed = discord.Embed(
+								title = "",
+								description = "",
+								color=0x00ff00
+								)
+							embed_list.append(tmp_embed)
+						embed_list[embed_index].add_field(name = item_id, value = count)
+					embed_list[len(embed_list)-1].set_footer(text = f"전체 아이템 종류  :  {len(item_Data)}개")
+					if len(embed_list) > 1:
+						for embed_data in embed_list:
+							await asyncio.sleep(0.1)
+							await ctx.send(embed = embed_data)
+						return
+					else:
+						return await ctx.send(embed=embed, tts=False)
 				else :
 					embed.add_field(name = '\u200b\n', value = '창고가 비었습니다.\n\u200b')
-
-				embed.set_footer(text = f"전체 아이템 종류  :  {len(item_Data)}개")
-				return await ctx.send(embed=embed, tts=False)
+					return await ctx.send(embed=embed, tts=False)
 
 			input_data = args.split()
 			
@@ -2893,14 +2914,14 @@ while True:
 
 				for i in range(bossNum):
 					################ 보스 컷처리 ################ 
-					if message.content.startswith('.컷' +bossData[i][0]) or message.content.startswith(convertToInitialLetters('.컷' +bossData[i][0])) or message.content.startswith(' .컷' +bossData[i][0]) or message.content.startswith(convertToInitialLetters(' .컷' +bossData[i][0])):
+					if message.content.startswith(bossData[i][0] +'컷') or message.content.startswith(convertToInitialLetters(bossData[i][0] +'컷')) or message.content.startswith(bossData[i][0] +' 컷') or message.content.startswith(convertToInitialLetters(bossData[i][0] +' 컷')):
 						if hello.find('  ') != -1 :
 							bossData[i][6] = hello[hello.find('  ')+2:]
 							hello = hello[:hello.find('  ')]
 						else:
 							bossData[i][6] = ''
 							
-						tmp_msg = +'.컷' +bossData[i][0]
+						tmp_msg = bossData[i][0] +'컷'
 						if len(hello) > len(tmp_msg) + 3 :
 							if hello.find(':') != -1 :
 								chkpos = hello.find(':')
